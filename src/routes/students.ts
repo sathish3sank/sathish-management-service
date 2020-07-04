@@ -11,7 +11,6 @@ import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/pipeable";
 import { sequenceT } from "fp-ts/lib/Apply";
 
-
 const studentId = t.type({
   id: t.number,
 });
@@ -24,6 +23,13 @@ const validateId = (id: string) => {
   const regex = /[0-9]+$/;
   return regex.test(id) ? true : false;
 };
+
+const ValidateIdEither = (id) =>
+  pipe(
+    seqteither(id),
+    E.map(([x]: any) => ({ id: x.id })),
+    E.mapLeft((_) => makeUndefinedError("Could not read request params"))
+  );
 
 export const student = router();
 
@@ -42,13 +48,11 @@ student.get("/id/:id", async (req, res, err) => {
   if (!validateId(reqId)) {
     return res.json({ ...makeBadInputError("Invalid id provided.") });
   }
-
-  const resp = pipe(
-    seqteither(studentId.decode({ id: parseInt(reqId) })),
-    E.map(([x]) => {
-      return { id: x.id };
-    }),
-    E.mapLeft((_) => makeUndefinedError("Could not read request params"))
-  );
-  return res.json({ ...resp });
+  return E.fold(
+    (err: any) => res.json({ ...err }),
+    (response: any) =>
+      res.json({
+        id: response.id,
+      })
+  )(ValidateIdEither(studentId.decode({ id: parseInt(reqId) })));
 });
