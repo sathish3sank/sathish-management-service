@@ -3,9 +3,9 @@
    "host": "localhost",
    "port": 3306,
    "username": "root",
-   "password": "sathya@123",
+   "password": "Sathya@123",
    "database": "kcg",
-   "synchronize": true,
+   "synchronize": false,
    "logging": false,
    "entities": [
       "src/entity/**/*.ts"
